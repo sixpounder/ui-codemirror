@@ -10,23 +10,9 @@ angular.module('ui.codemirror', [])
 /**
  * @ngInject
  */
-function uiCodemirrorDirective($timeout, uiCodemirrorConfig) {
+var uiCodemirrorDirective = ['$timeout', 'uiCodemirrorConfig', function uiCodemirrorDirective($timeout, uiCodemirrorConfig) {
 
-  return {
-    restrict: 'EA',
-    require: '?ngModel',
-    compile: function compile() {
-
-      // Require CodeMirror
-      if (angular.isUndefined(window.CodeMirror)) {
-        throw new Error('ui-codemirror needs CodeMirror to work... (o rly?)');
-      }
-
-      return postLink;
-    }
-  };
-
-  function postLink(scope, iElement, iAttrs, ngModel) {
+  var postLink = function postLink(scope, iElement, iAttrs, ngModel) {
 
     var codemirrorOptions = angular.extend(
       { value: iElement.text() },
@@ -61,9 +47,9 @@ function uiCodemirrorDirective($timeout, uiCodemirrorConfig) {
     if (angular.isFunction(codemirrorOptions.onLoad)) {
       codemirrorOptions.onLoad(codemirror);
     }
-  }
+  };
 
-  function newCodemirrorEditor(iElement, codemirrorOptions) {
+  var newCodemirrorEditor = function newCodemirrorEditor(iElement, codemirrorOptions) {
     var codemirrot;
 
     if (iElement[0].tagName === 'TEXTAREA') {
@@ -77,14 +63,14 @@ function uiCodemirrorDirective($timeout, uiCodemirrorConfig) {
     }
 
     return codemirrot;
-  }
+  };
 
   function configOptionsWatcher(codemirrot, uiCodemirrorAttr, scope) {
     if (!uiCodemirrorAttr) { return; }
 
     var codemirrorDefaultsKeys = Object.keys(window.CodeMirror.defaults);
-    scope.$watch(uiCodemirrorAttr, updateOptions, true);
-    function updateOptions(newValues, oldValue) {
+
+    var updateOptions = function updateOptions(newValues, oldValue) {
       if (!angular.isObject(newValues)) { return; }
       codemirrorDefaultsKeys.forEach(function(key) {
         if (newValues.hasOwnProperty(key)) {
@@ -96,7 +82,9 @@ function uiCodemirrorDirective($timeout, uiCodemirrorConfig) {
           codemirrot.setOption(key, newValues[key]);
         }
       });
-    }
+    };
+
+    scope.$watch(uiCodemirrorAttr, updateOptions, true);
   }
 
   function configNgModelLink(codemirror, ngModel, scope) {
@@ -147,4 +135,18 @@ function uiCodemirrorDirective($timeout, uiCodemirrorConfig) {
     });
   }
 
-}
+  return {
+    restrict: 'EA',
+    require: '?ngModel',
+    compile: function compile() {
+
+      // Require CodeMirror
+      if (angular.isUndefined(window.CodeMirror)) {
+        throw new Error('ui-codemirror needs CodeMirror to work... (o rly?)');
+      }
+
+      return postLink;
+    }
+  };
+
+}];
